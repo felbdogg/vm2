@@ -8,7 +8,6 @@ This project is a chat interface designed for Felbdogg.AI, a chatbot application
 - **Dark Mode Toggle**: Users can switch between light and dark themes using the theme toggle button.
 - **Session Management**: Users can create, rename, and delete chat sessions. Sessions are stored locally using `localStorage`.
 - **File Upload**: Users can upload images to the chat interface, which are sent as base64 encoded strings.
-- **Modal Window**: An "About Us" modal provides additional information about Felbdogg.AI.
 - **Toast Notifications**: Toast notifications provide feedback to users, such as confirming actions like copying text to the clipboard.
 
 ## File Structure
@@ -25,7 +24,6 @@ This project is a chat interface designed for Felbdogg.AI, a chatbot application
 2. Interact with the chat interface by typing a message in the input box and clicking the send button.
 3. Use the dropdown menu to manage chat sessions or toggle the theme.
 4. Upload an image by clicking the upload button and selecting a file.
-5. Click the "About Us" button to view information in the modal window.
 
 ## Local Storage
 - Chat sessions are saved locally in the browser's `localStorage`.
