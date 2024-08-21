@@ -14,7 +14,6 @@ This project is a chat interface designed for Felbdogg.AI, a chatbot application
 ## File Structure
 - **index.html**: The main HTML file that contains the chat interface.
 - **assets/**: A folder containing assets such as images, including the logo for Felbdogg.AI.
-- **styles/**: Contains custom CSS styles for the project.
 
 ## External Libraries
 - **Bootstrap**: Used for responsive design and UI components.
