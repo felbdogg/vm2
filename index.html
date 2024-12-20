@@ -133,7 +133,6 @@
             height: 1rem;
         }
 
-        /* Dropdown Menu Styles */
         .dropdown-content {
             display: none;
             position: absolute;
@@ -236,7 +235,6 @@
             visibility: hidden;
             max-width: 50px;
             height: 50px;
-            /*margin-left: -125px;*/
             margin: auto;
             background-color: #333;
             color: #fff;
@@ -294,6 +292,8 @@
                 <button id="delete-session-btn">Delete Session</button>
                 <button id="toggle-dark-mode">Theme Toggle</button>
                 <button id="myModal-btn">About Us</button>
+                <!-- New button for API key modal -->
+                <button id="apiKeyModal-btn">Set API Key</button>
                 <select id="session-select">
                     <option value="0">Session 1</option>
                 </select>
@@ -325,17 +325,30 @@
         <button id="upload-btn"><i class="fa-solid fa-file-import"></i></button>
     </div>
 
-    <!-- Modal -->
+    <!-- About Us Modal -->
     <div id="myModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close close-about">&times;</span>
             <center>Felbdogg.ai</center>
             <hr>
             <p>Under Construction</p>
         </div>
     </div>
 
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal">
+        <div class="modal-content">
+            <span class="close close-apiKey">&times;</span>
+            <h3>Set Your API Key</h3>
+            <input type="text" id="apiKeyInput" placeholder="Enter your API key" style="width:100%; padding:5px; margin-bottom:10px;">
+            <button id="saveApiKeyBtn" style="padding:10px;">Save API Key</button>
+        </div>
+    </div>
+
     <script>
+        // Retrieve API key from localStorage
+        let apiKey = localStorage.getItem('apiKey') || '';
+
         document.getElementById("send-btn").addEventListener("click", async function() {
             const userInput = document.getElementById("chatbot-input").value;
             const selectedModel = document.getElementById("model-select").value;
@@ -350,6 +363,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        // Include API Key if available
+                        ...(apiKey ? { 'Authorization': 'Bearer ' + apiKey } : {})
                     },
                     body: JSON.stringify({ query: userInput, model: selectedModel }),
                 });
@@ -390,7 +405,6 @@
             currentSession.push({ user: userInput, bot: botResponse });
             sessions[currentSessionIndex].logs = currentSession;
             localStorage.setItem('chatSessions', JSON.stringify(sessions));
-            console.log('Saved session:', sessions);
         }
 
         function loadSession(sessionIndex) {
@@ -398,7 +412,6 @@
             const session = sessions[sessionIndex]?.logs || [];
             localStorage.setItem('currentSession', JSON.stringify(session));
             displaySession(session);
-            console.log(`Loaded session ${sessionIndex}:`, session);
         }
 
         function displaySession(session) {
@@ -433,7 +446,6 @@
                 option.text = session.name || `Session ${index + 1}`;
                 sessionSelect.appendChild(option);
             });
-            console.log("Session list loaded: ", sessions);
         }
 
         function deleteSession(sessionIndex) {
@@ -447,7 +459,6 @@
                 localStorage.setItem('currentSession', JSON.stringify([]));
                 document.getElementById("chatbot-log").innerHTML = '';
             }
-            console.log(`Deleted session ${sessionIndex}`);
         }
 
         document.getElementById("upload-btn").addEventListener("click", function() {
@@ -472,6 +483,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            ...(apiKey ? { 'Authorization': 'Bearer ' + apiKey } : {})
                         },
                         body: JSON.stringify({ query: base64String, isImage: true }),
                     });
@@ -502,7 +514,6 @@
                 document.getElementById("session-select").value = newSessionIndex;
                 loadSession(newSessionIndex);
                 showToast('Created new session');
-                console.log(`Created new session ${newSessionIndex} with name ${newName}`);
             }
         });
 
@@ -524,7 +535,6 @@
                 localStorage.setItem('chatSessions', JSON.stringify(sessions));
                 loadSessionList();
                 document.getElementById("session-select").value = sessionIndex;
-                console.log(`Renamed session ${sessionIndex} to ${newName}`);
             }
         });
 
@@ -533,26 +543,19 @@
             deleteSession(sessionIndex);
         });
 
-        document.addEventListener("DOMContentLoaded", function() {
-            loadSessionList();
-            if (document.getElementById("session-select").options.length > 0) {
-                document.getElementById("session-select").value = 0;
-                loadSession(0);
-            }
-        });
-
+        // About Us Modal Handling
         var modal = document.getElementById("myModal");
-        var btn = document.getElementById("myModal-btn");
-        var span = document.getElementsByClassName("close")[0];
+        var aboutBtn = document.getElementById("myModal-btn");
+        var closeAbout = document.getElementsByClassName("close-about")[0];
 
-        btn.onclick = function() {
+        aboutBtn.onclick = function() {
             modal.style.display = "block";
             if (document.body.classList.contains('dark-mode')) {
                 modal.classList.add('dark-mode');
             }
         }
 
-        span.onclick = function() {
+        closeAbout.onclick = function() {
             modal.style.display = "none";
             modal.classList.remove('dark-mode');
         }
@@ -561,6 +564,43 @@
             if (event.target == modal) {
                 modal.style.display = "none";
                 modal.classList.remove('dark-mode');
+            }
+        }
+
+        // API Key Modal Handling
+        var apiKeyModal = document.getElementById("apiKeyModal");
+        var apiKeyBtn = document.getElementById("apiKeyModal-btn");
+        var closeApiKey = document.getElementsByClassName("close-apiKey")[0];
+        var saveApiKeyBtn = document.getElementById("saveApiKeyBtn");
+
+        apiKeyBtn.onclick = function() {
+            apiKeyModal.style.display = "block";
+            if (document.body.classList.contains('dark-mode')) {
+                apiKeyModal.classList.add('dark-mode');
+            }
+        }
+
+        closeApiKey.onclick = function() {
+            apiKeyModal.style.display = "none";
+            apiKeyModal.classList.remove('dark-mode');
+        }
+
+        window.addEventListener('click', function(event) {
+            if (event.target == apiKeyModal) {
+                apiKeyModal.style.display = "none";
+                apiKeyModal.classList.remove('dark-mode');
+            }
+        });
+
+        saveApiKeyBtn.onclick = function() {
+            const enteredKey = document.getElementById("apiKeyInput").value.trim();
+            if (enteredKey) {
+                apiKey = enteredKey;
+                localStorage.setItem('apiKey', apiKey);
+                showToast('API Key Saved');
+                apiKeyModal.style.display = "none";
+            } else {
+                showToast('Please enter a valid API key');
             }
         }
 
@@ -591,6 +631,14 @@
                 document.body.removeChild(toast);
             }, 3000);
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadSessionList();
+            if (document.getElementById("session-select").options.length > 0) {
+                document.getElementById("session-select").value = 0;
+                loadSession(0);
+            }
+        });
     </script>
 </body>
 </html>
